@@ -1,0 +1,98 @@
+<?php
+$objectManager= \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager= $objectManager->create('\Magento\Store\Model\StoreManagerInterface');
+$store_id= $storeManager->getStore()->getId();
+$root_id= $storeManager->getStore($store_id)->getRootCategoryId();
+$category= $objectManager->create('Magento\Catalog\Model\Category')->load($root_id);
+$collection= $category->getChildrenCategories()
+         				->addAttributeToFilter('include_in_menu',1)
+         				->load();
+$current_id=$this->getCurrentCategory()->getId();
+//$parentids= $this->getCurrentCategory()->getParentId();
+$path = $this->getCurrentCategory()->getPath();
+     $parentids = explode('/', $path);
+      unset($parentids[0]);
+if(count($collection)>0):
+?>
+<div class="categories-sec">
+	<ul class="first-level">
+	 <?php
+		foreach ($collection as $category) :?>
+		<li class="fisrt-level-cat1 <?php echo ($current_id == $category->getId()|| in_array($category->getId(), $parentids)) ? 'active' : '' ; ?>" cat-id="<?=$category->getId()?>">
+			<a href="<?= $category->getUrl();?>"><?= $category->getName();?></a>			
+			<?php
+			    $catId = $category->getId(); // Parent Category ID
+        		$category_child = $objectManager->create('Magento\Catalog\Model\Category')
+        										->load($catId);
+				$subCategory2 = $category_child->getChildrenCategories();
+			if(count($subCategory2)>0):
+			?>
+			<span class="tab">+</span>
+			<div class="sub-menu" style="display: none;">
+				<ul class="second-level">
+					<?php 
+					foreach ($subCategory2 as $category2) : ?>
+						<li class="second-level-cat2 <?php echo ($current_id == $category2->getId()|| in_array($category2->getId(), $parentids)) ? 'active' : '' ; ?>" cat-id="<?=$category2->getId()?>">
+							<a href="<?= $category2->getUrl();?>"><?= $category2->getName();?></a>
+							<?php
+							    $catId2 = $category2->getId(); // Parent Category ID
+				        		$category_child2 = $objectManager->create('Magento\Catalog\Model\Category')
+				        										->load($catId2);
+								$subCategory3 = $category_child2->getChildrenCategories();
+							if(count($subCategory3)>0):
+							?>
+							<span class="tab">+</span>
+							<div class="sub-menus" style="display: none;">
+								<ul class="third-level">
+									<?php 
+									foreach ($subCategory3 as $category3) : ?>
+										<li class="third-level-cat3 <?php echo ($current_id == $category3->getId()|| in_array($category3->getId(), $parentids)) ? 'active' : '' ; ?>" cat-id="<?=$category3->getId()?>">
+											<a href="<?= $category3->getUrl();?>"><?= $category3->getName();?>
+											</a>
+											<?php
+												$catId3 = $category3->getId();
+												$category_child3 = $objectManager->create('Magento\Catalog\Model\Category')
+																			->load($catId3);
+												$subCategory4 = $category_child3->getChildrenCategories();
+											if(count($subCategory4)>0):
+											?>
+											<span class="tab">+</span>
+											<div class="sub-menus4" style="display: none;">
+												<ul class="fourth-level">
+													<?php 
+													foreach ($subCategory4 as $category4) : ?>
+														<li class="fourth-level-cat4 <?php echo ($current_id == $category4->getId()|| in_array($category4->getId(), $parentids)) ? 'active' : '' ; ?>" cat-id="<?=$category4->getId()?>">
+															<a href="<?= $category4->getUrl();?>"><?= $category4->getName();?>
+															</a>
+														</li>
+													<?php endforeach ?>
+												</ul>
+											</div>
+										<?php endif ?>
+										</li>
+									<?php endforeach ?>
+								</ul>
+							</div>
+							<?php endif ?>
+						</li>
+					<?php endforeach ?>
+				</ul>
+			</div>
+			<?php endif ?>
+		</li>
+	  <?php endforeach ?>
+	</ul>
+</div>
+
+  <?php endif ?>
+
+<script type="text/javascript">
+	require([
+	'jquery'
+	], function ($) {
+		$(".categories-sec .fisrt-level-cat1 .tab,.categories-sec .second-level-cat2 .tab").click(function() {
+		$(this).toggleClass('open');
+		$(this).next().slideToggle();
+		});
+    });
+</script>
