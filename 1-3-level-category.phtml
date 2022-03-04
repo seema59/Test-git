@@ -1,4 +1,5 @@
 <?php
+/*Show categories level in the sidebar navigation*/
 $objectManager= \Magento\Framework\App\ObjectManager::getInstance();
 $storeManager= $objectManager->create('\Magento\Store\Model\StoreManagerInterface');
 $store_id= $storeManager->getStore()->getId();
